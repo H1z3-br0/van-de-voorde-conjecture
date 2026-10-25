@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite the paper (see preferred-citation below)."
+title: "Conics and (q+1)/2 exterior points forming a set without tangents: a proof of a conjecture of Van de Voorde — supplementary material"
+authors:
+  - family-names: "Chobanov"
+    given-names: "I. A."
+    orcid: "https://orcid.org/0009-0001-1401-6527"
+    email: "cobanovimam752@gmail.com"
+    affiliation: "AESC MSU (Kolmogorov School), Moscow"
+version: "1.0.0"
+license: MIT
+keywords:
+  - finite geometry
+  - conic
+  - set without tangents
+  - exterior set
+  - Jacobi sums
+  - Lean 4
+preferred-citation:
+  type: article
+  title: "Conics and (q+1)/2 exterior points forming a set without tangents: a proof of a conjecture of Van de Voorde"
+  authors:
+    - family-names: "Chobanov"
+      given-names: "I. A."
+  year: 2026
+  notes: "Preprint; arXiv identifier / DOI to be added."

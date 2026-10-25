@@ -1,0 +1,42 @@
+name: checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  computations:
+    name: Python scripts and search program
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sh supplement/run_all.sh
+
+  lean:
+    name: Lean formalisation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: supplement/lean/BSWCheck
+      - name: Forbidden commands and axiom audit
+        working-directory: supplement/lean/BSWCheck
+        run: sh scripts/check.sh
+
+  paper:
+    name: Paper
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paper
+          path: main.pdf

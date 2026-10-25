@@ -1,0 +1,808 @@
+\documentclass[11pt]{amsart}
+
+\usepackage[a4paper,margin=2.7cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[colorlinks=true,linkcolor=MidnightBlue,citecolor=OliveGreen,urlcolor=MidnightBlue]{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem*{maintheorem}{Theorem A}
+\newtheorem*{maincorollary}{Corollary B}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+
+\newcommand{\F}{\mathbb{F}_q}
+\newcommand{\Fs}{\mathbb{F}_q^{*}}
+\newcommand{\PGone}{\mathrm{PG}(1,q)}
+\newcommand{\PGtwo}{\mathrm{PG}(2,q)}
+\newcommand{\PGL}{\mathrm{PGL}(2,q)}
+\newcommand{\PSL}{\mathrm{PSL}(2,q)}
+\newcommand{\Sq}{\mathcal{S}}
+\newcommand{\Ns}{\mathcal{N}}
+\newcommand{\Con}{\mathcal{C}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\res}[2]{\langle #1\rangle_{#2}}
+\newcommand{\conj}[1]{\overline{#1}}
+\newcommand{\mA}{\mathsf{A}}
+\newcommand{\mN}{\mathsf{N}}
+\newcommand{\doi}[1]{\href{https://doi.org/#1}{doi:\nolinkurl{#1}}}
+\newcommand{\arxiv}[1]{\href{https://arxiv.org/abs/#1}{arXiv:#1}}
+\definecolor{TODO}{rgb}{0.70,0.10,0.10}
+\newcommand{\todo}[1]{\textcolor{TODO}{[#1]}}
+\DeclareMathOperator{\Tr}{Tr}
+
+\hypersetup{
+  pdftitle={Conics and (q+1)/2 exterior points forming a set without tangents: a proof of a conjecture of Van de Voorde},
+  pdfauthor={I. A. Chobanov},
+  pdfsubject={Finite geometry},
+  pdfkeywords={conic, exterior set, set without tangents, untouchable set, arc, Jacobi sum, Stickelberger's theorem, Weil bound}
+}
+
+\begin{document}
+
+\title[A proof of Van de Voorde's conjecture]{Conics and $(q+1)/2$ exterior points forming a set without tangents:
+a proof of a conjecture of Van de Voorde}
+
+\author{I. A. Chobanov}
+\address{Advanced Educational and Scientific Center (Kolmogorov School), Lomonosov Moscow State University,
+Moscow, Russia}
+\email{cobanovimam752@gmail.com}
+\urladdr{\href{https://orcid.org/0009-0001-1401-6527}{https://orcid.org/0009-0001-1401-6527}}
+\thanks{The author is a high-school student at AESC MSU (Kolmogorov School). This research was carried out independently.}
+
+\subjclass[2020]{Primary 51E21; Secondary 51E20, 11T24, 05B25}
+\keywords{Conic, exterior set, set without tangents, untouchable set, arc, Jacobi sum, Stickelberger's theorem, Weil bound}
+\date{Draft, 26 October 2026}
+
+\begin{abstract}
+Let $\Con$ be a non-degenerate conic in $\PGtwo$, $q$ odd. Van de Voorde (2011) conjectured that the union of $\Con$ with
+$(q+1)/2$ points exterior to $\Con$ can be a set without tangents (a set met by no line in exactly one point) only for
+$q=7$ and $q=11$. We prove this conjecture. Equivalently, apart from the trivial case $q=3$ and the cases $q=7,11$, every
+exterior set of $(q+1)/2$ points of a conic contains three collinear points. For $q\equiv1\pmod 4$ this follows from a theorem
+of Blokhuis, Seress and Wilbrink; the case $q\equiv3\pmod4$ is new. The proof combines an analogue of Segre's lemma of
+tangents, which converts the absence of collinear triples into a multiplicative identity for the quadratic character,
+with autocorrelation identities of the Paley matrix, Jacobi sums and Stickelberger's theorem, and Weil's bound. We also show
+that for $q=7$ and $q=11$ the configuration is unique up to projectivity, with stabilisers $S_4$ and $A_5$. The proofs have
+been checked numerically, and the main chain of the argument has been formalised in Lean~4 modulo the classical theorems it
+uses.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}\label{sec:intro}
+
+Throughout, $q=p^k$ is a power of an odd prime $p$ and $\PGtwo$ is the Desarguesian projective plane of order $q$. A set
+$X$ of points of $\PGtwo$ is a \emph{set without tangents} (or an \emph{untouchable set}) if no line meets $X$ in exactly one
+point. For even $q$ hyperovals are the smallest non-empty examples; for odd $q$ the smallest size $u_q$ of a non-empty set
+without tangents is known only for a few values of $q$. Blokhuis, Seress and Wilbrink~\cite{BSW91} showed $u_3=6$, $u_5=10$,
+$u_7=12$, and Van de Voorde~\cite[\S1.2]{VdV} found $u_9=15$ and $u_{11}=18$ by computer; see also Héger and
+Nagy~\cite{HegerNagy} and Dover~\cite{Dover} for recent work on untouchable sets and their generalisations.
+
+Let $\Con$ be a non-degenerate conic. A point not on $\Con$ is \emph{exterior} if it lies on two tangent lines of $\Con$, and a
+line is \emph{external} (a \emph{passant}) if it misses $\Con$. An \emph{exterior set} of $\Con$ is a set $E$ of exterior points
+such that the line joining any two points of $E$ is external~\cite[\S1.1]{VdV}. An exterior set has at most $(q+1)/2$ points
+(Lemma~\ref{lem:pairs}); it is \emph{complete} if it has exactly $(q+1)/2$ points. The exterior points on a passant form a
+complete exterior set; we call such sets \emph{linear}.
+
+\begin{theorem}[Blokhuis, Seress, Wilbrink~\cite{BSW92}]\label{thm:BSW}
+If $q\equiv1\pmod4$, every complete exterior set of a conic in $\PGtwo$ is linear.
+\end{theorem}
+
+For $q\equiv3\pmod4$ there are non-linear complete exterior sets for $q=7,11,\dots,31$, and Blokhuis, Seress and Wilbrink
+conjectured that every complete exterior set is linear when $q>31$~\cite{BSW92}; see~\cite[\S1.1, \S3]{VdV}. This conjecture
+is still open.
+
+For $q=7$ and $q=11$ some complete exterior sets $S$ contain no three collinear points, and then $\Con\cup S$ is a set without
+tangents of size $12=u_7$, respectively $18=u_{11}$~\cite[\S3]{VdV}, \cite{HegerNagy}. According to~\cite[\S3]{VdV}, the
+computations of Blokhuis, Seress and Wilbrink show that for $11<q\le31$ every complete exterior set contains three collinear
+points. On this basis Van de Voorde conjectured that $q=7$ and $q=11$ are the only values of $q$ for which a conic and $(q+1)/2$
+of its exterior points form a set without tangents~\cite[\S3]{VdV}. The conjecture is a consequence of the
+Blokhuis--Seress--Wilbrink conjecture: a linear complete exterior set has $(q+1)/2\ge3$ collinear points when $q\ge5$. We prove
+it unconditionally.
+
+\begin{maintheorem}
+Let $q$ be an odd prime power, $\Con$ a non-degenerate conic in $\PGtwo$, and $S$ a set of $(q+1)/2$ points exterior to $\Con$.
+\begin{enumerate}
+\item[(a)] $\Con\cup S$ is a set without tangents if and only if $S$ is an exterior set of $\Con$ and no three points of $S$ are
+collinear.
+\item[(b)] Such sets $S$ exist if and only if $q\in\{3,7,11\}$.
+\item[(c)] For $q\in\{7,11\}$ the set $S$ is unique up to collineations fixing $\Con$: for a given conic there are exactly $14$
+(for $q=7$), respectively $22$ (for $q=11$), such sets, and the stabiliser of each of them in the group $\PGL$ of collineations
+fixing $\Con$ is isomorphic to $S_4$, respectively $A_5$.
+\end{enumerate}
+\end{maintheorem}
+
+\begin{maincorollary}[Van de Voorde's conjecture]
+For odd $q\notin\{3,7,11\}$ a conic of $\PGtwo$ together with $(q+1)/2$ of its exterior points never forms a set without
+tangents. Equivalently, every complete exterior set of a conic in $\PGtwo$, $q\notin\{3,7,11\}$, contains three collinear
+points.
+\end{maincorollary}
+
+The case $q=3$ is trivial ($S$ consists of the two exterior points of a passant) and is implicitly excluded
+in~\cite{VdV}. For $q\equiv1\pmod4$, Theorem~A(b) is immediate from Theorem~\ref{thm:BSW}; the content of this paper is the
+case $q\equiv3\pmod4$, which we prove both for primes and for prime powers.
+
+\subsection*{Outline of the proof}
+We identify exterior points of $\Con$ with unordered pairs of points of $\PGone$ (the two points of tangency), using binary
+quadratic forms (Section~\ref{sec:forms}). After a projectivity, a complete exterior set containing the point $\{0,\infty\}$ is
+described by a fixed-point-free involution $\psi$ of $\Fs$ satisfying three conditions (H1)--(H3) on the quadratic character
+$\chi$. Our argument has four steps.
+\begin{enumerate}
+\item A Segre-type lemma (Lemma~\ref{lem:segre}), in the spirit of Segre's lemma of tangents~\cite{Segre55}: for three pairwise
+compatible exterior points, a product of ``slopes'' over the external lines through them equals a sign $-\varepsilon$ coming
+from the Paley tournament. If no three points of $S$ are collinear, Ceva's theorem forces $\varepsilon=-1$, which in
+coordinates is the identity~\eqref{eq:A}: $\chi(\psi z-\psi y)=-\chi(z-y)\chi(yz)$.
+\item Two autocorrelation identities (Lemma~\ref{lem:autocorr}) give the matrix identity $\mN\mA+\mA\mN=-2I$ for the Jacobsthal
+matrix $\mA$ and a matrix $\mN$ supported on the graph of $\psi$. Evaluated on multiplicative characters it becomes
+$\bigl(J(\chi,\eta)+\conj{J(\chi,\eta')}\bigr)M(\eta',\eta)=-2(q-1)\delta_{\eta\eta'}$ (Lemma~\ref{lem:jacobi}), where $M$ is the
+matrix of $\psi$ in the character basis.
+\item Stickelberger's theorem on the prime factorisation of Gauss sums, together with a combinatorial lemma on base-$p$ digits
+(Lemma~\ref{lem:L}), shows that $J(\chi,\eta_1)+\conj{J(\chi,\eta')}$ vanishes, for a generator $\eta_1$, only when
+$\eta'=\chi\eta_1^{p^j}$ (Proposition~\ref{prop:coinc}).
+\item Hence $\psi(x)=cx^{p^{j}}$ on the squares (Proposition~\ref{prop:frob}). Weil's bound then leaves only $q\in\{7,11\}$ when
+$j=0$ (Proposition~\ref{prop:lin}) and rules out $j\ne0$ altogether (Proposition~\ref{prop:frob-impossible}).
+\end{enumerate}
+Section~\ref{sec:proof} assembles the proof of Theorem~A and treats the examples for $q=7,11$. Section~\ref{sec:verification}
+describes the numerical checks and a Lean~4 formalisation of the main chain of the argument.
+
+\section{Preliminaries}\label{sec:prelim}
+
+\subsection{Notation}
+Let $\F$ be the field with $q=p^k$ elements, $p$ odd, and $\chi$ its quadratic character, extended by $\chi(0)=0$. We write
+$h=(q-1)/2$, $\Sq\subset\Fs$ for the set of non-zero squares and $\Ns=\Fs\setminus\Sq$ for the non-squares; $|\Sq|=|\Ns|=h$.
+We put $\PGone=\F\cup\{\infty\}$. For an integer $m\ge1$ and $x\in\Z/m\Z$ (or $x\in\Z$) we denote by $\res{x}{m}\in\{0,\dots,m-1\}$
+the least non-negative residue. When $q\equiv3\pmod 4$ we have $p\equiv3\pmod4$, $k$ odd, $h$ odd and $\chi(-1)=-1$.
+
+\subsection{Character sums}
+We use two standard facts.
+\begin{itemize}
+\item[(W0)] If $a\ne0$ and $D=b^2-4ac\ne0$, then $\sum_{x\in\F}\chi(ax^2+bx+c)=-\chi(a)$. Indeed,
+$\chi(4a)\chi(ax^2+bx+c)=\chi\bigl((2ax+b)^2-D\bigr)$, and $\sum_{y\in\F}\chi(y^2-D)=-1$ because $y^2-z^2=D$ has $q-1$ solutions.
+\item[(W)] (Weil's bound) If $f\in\F[x]$ has degree $d\ge1$ and is not of the form $a\,g(x)^2$ with $a\in\F$, $g\in\F[x]$, then
+$\bigl|\sum_{x\in\F}\chi(f(x))\bigr|\le(d-1)\sqrt q$; see~\cite[Theorem~5.41]{LN}, \cite{Schmidt}. (In~\cite{LN} the
+factor is $d'-1$, where $d'\le d$ is the number of distinct roots of $f$.)
+\end{itemize}
+
+\subsection{Gauss and Jacobi sums}
+Let $\widehat{\Fs}$ be the group of multiplicative characters $\eta\colon\Fs\to\C^*$, extended by $\eta(0)=0$; write $1$ for the
+trivial character. Let $\zeta_p=e^{2\pi i/p}$ and $\Tr\colon\F\to\mathbb F_p$ the absolute trace. For $\lambda,\mu\in\widehat{\Fs}$ put
+\[
+G(\lambda)=\sum_{x\in\F}\lambda(x)\,\zeta_p^{\Tr(x)},\qquad J(\lambda,\mu)=\sum_{t\in\F}\lambda(1-t)\,\mu(t).
+\]
+We use the following standard facts (see e.g.~\cite[Chapter~5]{LN}, \cite{BEW}): if $\lambda\ne1$ then $|G(\lambda)|^2=q$; if
+$\lambda,\mu,\lambda\mu\ne1$ then $J(\lambda,\mu)=G(\lambda)G(\mu)/G(\lambda\mu)$, so $|J(\lambda,\mu)|=\sqrt q$. Since $\chi$ is
+real, $\conj{J(\chi,\eta)}=J(\chi,\conj\eta)$.
+
+\begin{lemma}\label{lem:frob}
+$J(\chi,\eta^p)=J(\chi,\eta)$ for every $\eta\in\widehat{\Fs}$.
+\end{lemma}
+\begin{proof}
+The map $t\mapsto t^p$ is a bijection of $\F$ fixing $1$, and $\chi(z^p)=\chi(z)^p=\chi(z)$. Hence
+$J(\chi,\eta^p)=\sum_t\chi(1-t)\eta(t^p)=\sum_t\chi(1-t^p)\eta(t^p)=\sum_u\chi(1-u)\eta(u)$.
+\end{proof}
+
+\emph{Stickelberger's theorem.} Let $K=\Q(\zeta_{q-1},\zeta_p)$, let $\mathfrak p$ be a prime of $\Z[\zeta_{q-1}]$ above $p$, whose
+residue field we identify with $\F$, and let $\mathfrak P$ be the prime of $K$ above $\mathfrak p$. The \emph{Teichmüller
+character} $\omega\in\widehat{\Fs}$ is defined by $\omega(x)\equiv x\pmod{\mathfrak p}$; it generates $\widehat{\Fs}$. For
+$j\in\Z/(q-1)\Z$ let $s(j)$ denote the sum of the base-$p$ digits of $\res{j}{q-1}$.
+
+\begin{theorem}[Stickelberger~\cite{Stickelberger}; see~{\cite[Chapter~6]{Washington}}]\label{thm:stickelberger}
+For $j\in\Z/(q-1)\Z$, $j\ne0$, the $\mathfrak P$-adic valuation of $G(\omega^{-j})$, normalised by $v_{\mathfrak P}(p)=1$, is
+$v_{\mathfrak P}\bigl(G(\omega^{-j})\bigr)=s(j)/(p-1)$.
+\end{theorem}
+
+\begin{remark}\label{rem:convention}
+Some authors state Theorem~\ref{thm:stickelberger} for $\omega^{j}$ instead of $\omega^{-j}$, or define Gauss sums with an extra
+sign. Neither change affects our use of the theorem: valuations ignore signs, and we only use the theorem in the form of
+identities quantified over all $t\in(\Z/(q-1)\Z)^*$, which are invariant under $t\mapsto-t$.
+\end{remark}
+
+For $t\in(\Z/(q-1)\Z)^*$ let $\sigma_t\in\mathrm{Gal}(K/\Q(\zeta_p))$ be the automorphism with $\sigma_t(\zeta_{q-1})=\zeta_{q-1}^t$; it
+exists because $\gcd(p,q-1)=1$, so that $\Q(\zeta_{q-1})$ and $\Q(\zeta_p)$ are linearly disjoint. Since character values are
+$(q-1)$-st roots of unity and $\zeta_p$ is fixed, $\sigma_t(G(\lambda))=G(\lambda^t)$.
+
+\section{Exterior points as pairs}\label{sec:forms}
+
+\subsection{The model}
+Let $V$ be the $3$-dimensional $\F$-space of binary quadratic forms $f(X,Y)=aX^2+bXY+cY^2$; we identify $\PGtwo$ with the
+projective space of $V$ and write $[f]$ for the point defined by $f\ne0$. The discriminant $\Delta(f)=b^2-4ac$ is a
+non-degenerate quadratic form on $V$, with polar form
+\[
+B(f,g)=b_fb_g-2(a_fc_g+c_fa_g),\qquad \Delta(sf+ug)=s^2\Delta(f)+2su\,B(f,g)+u^2\Delta(g).
+\]
+Hence $\Con=\{[f]:\Delta(f)=0\}$ is a non-degenerate conic; since all non-degenerate conics of $\PGtwo$ are projectively
+equivalent~\cite{Hirschfeld}, we may and do work with this one. Its points are the squares $[\ell_t^2]$ of linear forms, where
+$\ell_t=X-tY$ for $t\in\F$ and $\ell_\infty=Y$. For $f\in V$ we write $f(t)=f(t,1)$ for $t\in\F$ and $f(\infty)=f(1,0)=a_f$;
+thus $f(t)=0$ if and only if $\ell_t\mid f$.
+
+The group $\mathrm{GL}(2,q)$ acts on $V$ by linear substitutions, and $\Delta(f\circ A)=\det(A)^2\Delta(f)$. This gives an action of
+$\PGL$ on $\PGtwo$ by collineations fixing $\Con$, compatible with the action of $\PGL$ on $\PGone$ by Möbius transformations on
+the roots of the forms. For prime $q$ this is the full stabiliser of $\Con$ in the collineation group~\cite{Hirschfeld}.
+
+\begin{lemma}\label{lem:dict}
+\begin{enumerate}
+\item[(i)] The tangent line to $\Con$ at $[\ell_t^2]$ is $T_t=\{[f]:f(t)=0\}$.
+\item[(ii)] A point $[f]\notin\Con$ is exterior if and only if $f=\kappa\,\ell_a\ell_b$ with $a\ne b$ in $\PGone$ and $\kappa\in\Fs$;
+the tangents through it are $T_a$ and $T_b$. Thus exterior points correspond bijectively to $2$-subsets $\{a,b\}$ of $\PGone$;
+we write $P=\{a,b\}$ and $F_P=\ell_a\ell_b$.
+\item[(iii)] Let $P=\{p_1,p_2\}$ be an exterior point and $f\in V$ with $[f]\ne P$. Then
+\begin{equation}\label{eq:pencil}
+B(F_P,f)^2-\Delta(F_P)\Delta(f)=4f(p_1)f(p_2),
+\end{equation}
+and the line $P[f]$ is a tangent if $f(p_1)f(p_2)=0$, a secant if $f(p_1)f(p_2)\in\Sq$, and a passant if $f(p_1)f(p_2)\in\Ns$.
+\item[(iv)] Through an exterior point there pass $2$ tangents, $h$ secants and $h$ passants of $\Con$.
+\item[(v)] Two distinct exterior points $P,Q$ sharing an element of $\PGone$ are joined by a tangent. If $P=\{a,b\}$ and
+$Q=\{c,d\}$ are disjoint, the line $PQ$ is a passant if and only if $\chi\bigl(R(P,Q)\bigr)=-1$, where
+$R(P,Q)=(a-c)(a-d)(b-c)(b-d)$ and factors involving $\infty$ are omitted.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) $T_t$ is a line containing $[\ell_t^2]$, and $[\ell_s^2]\in T_t$ only for $s=t$; so it is the tangent at $[\ell_t^2]$.
+
+(ii) By (i), $[f]$ lies on a tangent if and only if $f$ has a root in $\PGone$, i.e.\ splits into linear factors over $\F$. Since
+$[f]\notin\Con$, the two factors are distinct.
+
+(iii) Identity~\eqref{eq:pencil} is a polynomial identity in $p_1,p_2$ and the coefficients of $f$; it is checked by direct
+expansion (separately for $p_2=\infty$, where $F_P=\ell_{p_1}Y$). The line $P[f]$ meets $\Con$ in the points $[sF_P+uf]$ with
+$\Delta(sF_P+uf)=0$. The binary quadratic form $(s,u)\mapsto\Delta(sF_P+uf)$ is not identically zero (a line is not contained in
+$\Con$), and its discriminant is $4\bigl(B(F_P,f)^2-\Delta(F_P)\Delta(f)\bigr)=16f(p_1)f(p_2)$. So it has $1$, $2$ or $0$ zeros in
+$\PGone$ according as $f(p_1)f(p_2)$ is zero, a non-zero square or a non-square.
+
+(iv) Choose $g_1,g_2$ with $F_P,g_1,g_2$ a basis of $V$. The lines through $P$ are the lines $P[yg_1+zg_2]$, $(y:z)\in\PGone$, and
+\[
+n_P(y:z)=\frac{y\,g_1(p_1)+z\,g_2(p_1)}{y\,g_1(p_2)+z\,g_2(p_2)}\in\PGone
+\]
+is a Möbius function of $(y:z)$. It is invertible: otherwise a non-zero combination $yg_1+zg_2$ would vanish at $p_1$ and $p_2$,
+hence be a multiple of $F_P$. By (iii), the line is a tangent, a secant or a passant according as $n_P\in\{0,\infty\}$,
+$n_P\in\Sq$ or $n_P\in\Ns$, which proves the count.
+
+(v) If $P,Q$ share $a$, both lie on $T_a$. Otherwise apply (iii) with $f=F_Q$: $F_Q(a)F_Q(b)=R(P,Q)$.
+\end{proof}
+
+We call disjoint pairs $P,Q$ with $\chi(R(P,Q))=-1$ \emph{compatible}. Since $R(P,Q)$ has an even number of factors, compatibility
+is symmetric.
+
+\subsection{Sets without tangents and exterior arcs}
+A set of points with no three collinear is an \emph{arc}.
+
+\begin{proposition}[Theorem A(a)]\label{prop:untouchable}
+Let $S$ be a set of $(q+1)/2$ exterior points of $\Con$. Then $\Con\cup S$ is a set without tangents if and only if $S$ is an
+exterior set and an arc.
+\end{proposition}
+
+\begin{proof}
+Suppose $\Con\cup S$ has no tangents. Each of the $q+1$ tangent lines of $\Con$ meets $\Con$ in one point, so it contains a point
+of $S$. Each point of $S$ lies on exactly two tangents, so there are $2\cdot\frac{q+1}2=q+1$ incidences, and every tangent
+contains exactly one point of $S$. Let $P\in S$. Each of the $h$ passants through $P$ (Lemma~\ref{lem:dict}(iv)) must contain a
+point of $S\setminus\{P\}$, a set of $h$ points. Hence each of these passants contains exactly one point of $S\setminus\{P\}$,
+and all points of $S\setminus\{P\}$ lie on passants through $P$. So all lines $PQ$, $Q\in S$, are passants, and no line through
+$P$ contains two further points of $S$.
+
+Conversely, let $S$ be an exterior set and an arc. A tangent contains at most one point of $S$, since the line joining two
+points of $S$ is a passant; by the count above it contains exactly one, so it meets $\Con\cup S$ in two points. A secant meets
+$\Con$ twice. If a passant contains $P\in S$, then, since $S$ is an arc and an exterior set, the $h$ lines $PQ$, $Q\in
+S\setminus\{P\}$, are $h$ distinct passants through $P$, i.e.\ all of them; so the passant contains exactly one further point of
+$S$. A passant missing $S$ misses $\Con\cup S$.
+\end{proof}
+
+\begin{lemma}\label{lem:pairs}
+The points of an exterior set $E$ are pairwise disjoint and pairwise compatible $2$-subsets of $\PGone$. In particular
+$|E|\le(q+1)/2$, with equality if and only if $E$ is the set of $2$-cycles of a fixed-point-free involution of $\PGone$.
+\end{lemma}
+\begin{proof}
+This is Lemma~\ref{lem:dict}(v).
+\end{proof}
+
+\subsection{Normal form}
+Let $S$ be a complete exterior set. Since $\PGL$ is transitive on $2$-subsets of $\PGone$, we may assume that
+$P_0=\{0,\infty\}\in S$. By Lemma~\ref{lem:pairs},
+\[
+S=\{P_0\}\cup\bigl\{\{x,\psi(x)\}:x\in\Fs\bigr\}
+\]
+for a map $\psi\colon\Fs\to\Fs$, and by Lemma~\ref{lem:dict}(v) the following hold:
+\begin{itemize}
+\item[(H1)] $\psi$ is an involution without fixed points;
+\item[(H2)] $\chi(\psi(x))=-\chi(x)$ for all $x\in\Fs$ (compatibility with $P_0$, as $R(P_0,\{x,\psi x\})=x\psi(x)$);
+\item[(H3)] $\chi\bigl((x-y)(x-\psi y)(\psi x-y)(\psi x-\psi y)\bigr)=-1$ for all $x,y\in\Fs$ with $y\notin\{x,\psi x\}$.
+\end{itemize}
+Conversely, every $\psi$ with (H1)--(H3) defines a complete exterior set containing $P_0$. For example, $\psi(x)=n/x$ with
+$n\in\Ns$ satisfies (H1)--(H3), and the corresponding set is linear. In this language Theorem~\ref{thm:BSW} states that for
+$q\equiv1\pmod 4$ every $\psi$ with (H1)--(H3) has this form.
+
+\section{A Segre-type lemma}\label{sec:segre}
+
+From now on $q\equiv3\pmod4$, so $\chi(-1)=-1$ and $h$ is odd.
+
+\subsection{The Paley orientation}
+For distinct $x,y\in\PGone$ put $\theta(x,y)=\chi(x-y)$ if $x,y\in\F$, $\theta(\infty,y)=1$, $\theta(x,\infty)=-1$, and for pairwise
+distinct $x,y,z$ put $O(x,y,z)=\theta(x,y)\theta(y,z)\theta(z,x)$. Since $\chi(-1)=-1$, $\theta$ and $O$ are antisymmetric.
+
+\begin{lemma}\label{lem:eps}
+\begin{enumerate}
+\item[(i)] Let $g\in\PGL$ be represented by a matrix with determinant $\det g$. Then
+$O(gx,gy,gz)=\chi(\det g)\,O(x,y,z)$.
+\item[(ii)] For pairwise compatible exterior points $P=\{a,a'\}$, $Q=\{b,b'\}$, $R=\{c,c'\}$ the sign
+$\varepsilon(P,Q,R)=O(a,b,c)\,O(a',b',c')$ does not depend on the labelling of the elements inside the pairs, and is invariant
+under $\PGL$.
+\item[(iii)] In the frame of Section~\ref{sec:forms}, $\varepsilon\bigl(P_0,\{y,\psi y\},\{z,\psi z\}\bigr)=\chi\bigl((\psi z-\psi
+y)(z-y)\bigr)\chi(yz)$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) It suffices to check the generators $x\mapsto x+b$ (determinant $1$; $O$ is invariant), $x\mapsto ax$ (determinant $a$;
+each factor $\theta$ between finite points is multiplied by $\chi(a)$, and $O(\infty,y,z)=-\chi(y-z)$ also changes by $\chi(a)$)
+and $x\mapsto-1/x$ (determinant $1$). For the last one: for non-zero finite $x,y,z$,
+$\chi(-1/x+1/y)=\chi(x-y)\chi(xy)$, and the factors $\chi(xy)\chi(yz)\chi(zx)$ form a square; moreover
+$O(0,y,z)=-\chi(yz)\chi(y-z)=O(\infty,-1/y,-1/z)$, $O(\infty,y,z)=-\chi(y-z)=O(0,-1/y,-1/z)$ and
+$O(0,\infty,z)=-\chi(z)=O(\infty,0,-1/z)$.
+
+(ii) Swapping $a\leftrightarrow a'$ multiplies $\varepsilon$ by
+\[
+\theta(a,b)\theta(a,b')\theta(a',b)\theta(a',b')\cdot\theta(c,a)\theta(c',a)\theta(c,a')\theta(c',a')=\chi\bigl(R(P,Q)\bigr)\,\chi\bigl(R(P,R)\bigr)=1
+\]
+(if $\infty$ occurs, the omitted factors of $R$ correspond to values $\theta=\pm1$ occurring in pairs). Invariance follows from (i),
+since both factors of $\varepsilon$ are multiplied by $\chi(\det g)$.
+
+(iii) $O(0,y,z)=-\chi(yz)\chi(y-z)$ and $O(\infty,\psi y,\psi z)=-\chi(\psi y-\psi z)$.
+\end{proof}
+
+\subsection{The lemma}
+Let $P,Q,R$ be pairwise compatible, non-collinear exterior points, and fix representatives $F_P,F_Q,F_R$; they form a basis of
+$V$. Every line through $P$ other than $PQ$ and $PR$ meets $QR$ in a point $[yF_Q+zF_R]$ with $yz\ne0$; put $\lambda_P=z/y$.
+Similarly, for lines through $Q$ meeting $PR$ in $[xF_P+zF_R]$ put $\mu_Q=x/z$, and for lines through $R$ meeting $PQ$ in
+$[xF_P+yF_Q]$ put $\nu_R=y/x$. Let $\Pi_P$ be the product of $\lambda_P$ over the passants through $P$ other than $PQ,PR$, and
+define $\Pi_Q$, $\Pi_R$ in the same way. If $[f]=[xF_P+yF_Q+zF_R]$ with $xyz\ne0$, then the lines $P[f]$, $Q[f]$, $R[f]$ have
+\begin{equation}\label{eq:ceva}
+\lambda_P\,\mu_Q\,\nu_R=\frac zy\cdot\frac xz\cdot\frac yx=1 .
+\end{equation}
+
+\begin{lemma}[Segre-type lemma]\label{lem:segre}
+$\Pi_P\,\Pi_Q\,\Pi_R=-\varepsilon(P,Q,R)$.
+\end{lemma}
+
+\begin{proof}
+Both sides are invariant under $\PGL$: the action is linear on $V$, so it maps representatives to representatives, preserves the
+coordinates $x,y,z$ and preserves passants; for the right-hand side use Lemma~\ref{lem:eps}(ii). As $q+1>6$, we may therefore
+assume that $\infty$ is not among the six elements $p_1,p_2,q_1,q_2,r_1,r_2$ of $P=\{p_1,p_2\}$, $Q=\{q_1,q_2\}$,
+$R=\{r_1,r_2\}$. Each representative is $F_W=\kappa_W\ell_{w_1}\ell_{w_2}$ with $\kappa_W\in\Fs$.
+
+For a line through $P$ meeting $QR$ in $[yF_Q+zF_R]$ put $n=n_P=\bigl(F_Q(p_1)+\lambda F_R(p_1)\bigr)/\bigl(F_Q(p_2)+\lambda
+F_R(p_2)\bigr)$, $\lambda=z/y$, as in the proof of Lemma~\ref{lem:dict}(iv). The line $PQ$ has $n=n_Q:=F_Q(p_1)/F_Q(p_2)$ and
+$PR$ has $n=n_R:=F_R(p_1)/F_R(p_2)$; both are non-squares, because $PQ$ and $PR$ are passants (in particular
+$F_Q(p_i),F_R(p_i)\ne0$). Solving for $\lambda$,
+\[
+\lambda=c_P\,\frac{n-n_Q}{n-n_R},\qquad c_P=-\frac{F_Q(p_2)}{F_R(p_2)} .
+\]
+By Lemma~\ref{lem:dict}(iii),(iv), the passants through $P$ other than $PQ,PR$ correspond to $n\in\Ns\setminus\{n_Q,n_R\}$, a set of
+$h-2$ elements. Since $\prod_{n\in\Ns}(X-n)=X^h+1$, differentiating at $\alpha\ne\beta$ in $\Ns$ gives
+\[
+\prod_{n\in\Ns\setminus\{\alpha,\beta\}}\frac{n-\alpha}{n-\beta}=-\frac{h\alpha^{h-1}}{h\beta^{h-1}}=-\frac{\beta}{\alpha}
+\qquad(\text{as }\alpha^h=\beta^h=-1).
+\]
+As $h-2$ is odd, $c^{h-2}=\chi(c)c^{-2}$ for $c\in\Fs$. Therefore
+\[
+\Pi_P=c_P^{\,h-2}\Bigl(-\frac{n_R}{n_Q}\Bigr)=\chi\bigl(F_Q(p_2)F_R(p_2)\bigr)\,\frac{\Phi_R(P)}{\Phi_Q(P)},\qquad
+\Phi_W(U)=F_W(u_1)F_W(u_2),
+\]
+where we used $\chi(c_P)=-\chi(F_Q(p_2)F_R(p_2))$. By symmetry,
+\[
+\Pi_Q=\chi\bigl(F_R(q_2)F_P(q_2)\bigr)\,\frac{\Phi_P(Q)}{\Phi_R(Q)},\qquad
+\Pi_R=\chi\bigl(F_P(r_2)F_Q(r_2)\bigr)\,\frac{\Phi_Q(R)}{\Phi_P(R)}.
+\]
+Now $\Phi_W(U)=\kappa_W^2\prod_{i,j}(u_i-w_j)$, so $\Phi_W(U)/\Phi_U(W)=\kappa_W^2/\kappa_U^2$, and the product of the three
+ratios of $\Phi$'s equals $1$. The factors $\kappa$ inside $\chi$ occur in pairs. Writing $a=p_2$, $a'=p_1$, $b=q_2$, $b'=q_1$,
+$c=r_2$, $c'=r_1$, we obtain
+\[
+\Pi_P\Pi_Q\Pi_R=\chi\bigl[(a-b)(a-b')(a-c)(a-c')\cdot(b-c)(b-c')(b-a)(b-a')\cdot(c-a)(c-a')(c-b)(c-b')\bigr].
+\]
+The three products $(a-b)(b-a)$, $(a-c)(c-a)$, $(b-c)(c-b)$ are negatives of squares and contribute $\chi(-1)^3=-1$. For the
+remaining six factors, compatibility of $Q$ and $R$ gives $\chi\bigl((b-c')(c-b')\bigr)=\chi\bigl((b-c)(b'-c')\bigr)$, and hence
+\[
+\begin{aligned}
+&\chi\bigl[(a-b')(a-c')(b-c')(b-a')(c-a')(c-b')\bigr]\\
+&\qquad=\chi\bigl[(a-b')(b'-c')(c'-a)\bigr]\,\chi\bigl[(a'-b)(b-c)(c-a')\bigr]=O(a,b',c')\,O(a',b,c),
+\end{aligned}
+\]
+which is $\varepsilon(P,Q,R)$ by Lemma~\ref{lem:eps}(ii).
+\end{proof}
+
+\begin{corollary}\label{cor:A}
+Let $q\equiv3\pmod4$, $q\ge7$, and let $S$ be a complete exterior set which is an arc. Then $\varepsilon(P,Q,R)=-1$ for all distinct
+$P,Q,R\in S$. In the normal form of Section~\ref{sec:forms} this means
+\begin{equation}\label{eq:A}
+\chi\bigl(\psi(z)-\psi(y)\bigr)=-\chi(z-y)\,\chi(yz)\qquad\text{for all }y,z\in\Fs\text{ with }z\notin\{y,\psi y\}.\tag{A}
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Let $S'=S\setminus\{P,Q,R\}$; then $|S'|=h-2$. For $X\in S'$ the line $PX$ is a passant different from $PQ,PR$, and since $S$ is an
+arc the map $X\mapsto PX$ is injective, hence a bijection onto the $h-2$ passants through $P$ other than $PQ,PR$. Thus
+$\prod_{X\in S'}\lambda_P(PX)=\Pi_P$, and similarly for $Q$ and $R$. No $X\in S'$ lies on a side of the triangle $PQR$, so
+multiplying~\eqref{eq:ceva} over $X\in S'$ gives $\Pi_P\Pi_Q\Pi_R=1$, and Lemma~\ref{lem:segre} gives $\varepsilon=-1$. The second
+statement follows from Lemma~\ref{lem:eps}(iii) with $P=P_0$.
+\end{proof}
+
+\section{Autocorrelations and Jacobi sums}\label{sec:jacobi}
+
+In this section $\psi\colon\Fs\to\Fs$ satisfies (H1), (H2) and~\eqref{eq:A}; $q\equiv3\pmod 4$ is an arbitrary prime power.
+
+\begin{lemma}\label{lem:autocorr}
+For all $x\in\Fs$ and all $z\in\Fs\setminus\{x,\psi x\}$:
+\begin{align}
+&\chi\bigl(x(x-\psi x)\bigr)=-1, \tag{B}\label{eq:B}\\
+&\chi\bigl((x-\psi x)(z-\psi x)\bigr)=-\chi\bigl((x-\psi z)(z-\psi z)\bigr). \tag{C}\label{eq:C}
+\end{align}
+\end{lemma}
+
+\begin{proof}
+For (B), substitute $c=\psi(y)$, $y\in\Fs$, into $\sum_{c\in\F}\chi\bigl(c(\psi x-c)\bigr)=1$, an instance of (W0) (the term $c=0$
+vanishes). For $y\notin\{x,\psi x\}$, (H2) and~\eqref{eq:A} give $\chi(\psi y)\chi(\psi x-\psi y)=\chi(x)\chi(x-y)$; this also
+holds for $y=x$ (both sides vanish), while for $y=\psi x$ the term equals $\chi(x)\chi(\psi x-x)=-\chi(x)\chi(x-\psi x)$. Hence
+\[
+1=\chi(x)\Bigl[\sum_{y\in\Fs}\chi(x-y)-2\chi(x-\psi x)\Bigr]=\chi(x)\bigl[-\chi(x)-2\chi(x-\psi x)\bigr]=-1-2\chi\bigl(x(x-\psi x)\bigr).
+\]
+
+For (C), put $T_1=\chi\bigl((x-\psi x)(z-\psi x)\bigr)$, $T_2=\chi\bigl((x-\psi z)(z-\psi z)\bigr)$ and substitute $c=\psi(y)$ into
+$\sum_{c\in\F}\chi\bigl((\psi x-c)(\psi z-c)\bigr)=-1$ (W0). The term $c=0$ equals $\chi(\psi x\,\psi z)=\chi(xz)$. For
+$y\notin\{x,\psi x,z,\psi z\}$, two applications of~\eqref{eq:A} give the term $\chi(xz)\chi\bigl((x-y)(z-y)\bigr)$, and this
+formula also gives the correct value $0$ for $y\in\{x,z\}$. For $y=\psi x$ and $y=\psi z$ the terms are
+$U_1=\chi\bigl((x-\psi x)(x-\psi z)\bigr)$ and $U_2=\chi\bigl((z-\psi x)(z-\psi z)\bigr)$, whereas the formula would give
+$\chi(xz)T_1$ and $\chi(xz)T_2$. Now $U_i=T_i\,\chi\bigl((z-\psi x)(x-\psi z)\bigr)$, and~\eqref{eq:A} applied to the elements $x$ and
+$\psi z$ (which lie in different pairs) gives $\chi(\psi x-z)=-\chi(x-\psi z)\chi(x\psi z)$, whence
+$\chi\bigl((z-\psi x)(x-\psi z)\bigr)=\chi(x\psi z)=-\chi(xz)$ and $U_i=-\chi(xz)T_i$. Using
+$\sum_{y\in\Fs}\chi((x-y)(z-y))=-1-\chi(xz)$ we get
+\[
+-1=\chi(xz)+\chi(xz)\bigl(-1-\chi(xz)\bigr)-2\chi(xz)(T_1+T_2)=-1-2\chi(xz)(T_1+T_2),
+\]
+so $T_1+T_2=0$.
+\end{proof}
+
+For $\eta,\eta'\in\widehat{\Fs}$ put
+\[
+M(\eta',\eta)=\sum_{x\in\Fs}\conj{\eta'(x)}\,\eta(\psi x),
+\]
+the coefficients of $\eta\circ\psi$ in the character basis: $\eta\circ\psi=\frac1{q-1}\sum_{\eta'}M(\eta',\eta)\,\eta'$.
+
+\begin{lemma}\label{lem:jacobi}
+For all $\eta,\eta'\in\widehat{\Fs}\setminus\{1,\chi\}$,
+\[
+\bigl(J(\chi,\eta)+\conj{J(\chi,\eta')}\bigr)\,M(\eta',\eta)=-2(q-1)\,\delta_{\eta\eta'} .
+\]
+\end{lemma}
+
+\begin{proof}
+Consider the matrices $\mA_{xz}=\chi(x-z)$ (the Jacobsthal matrix) and $\mN_{xz}=\chi(x-\psi x)[z=\psi x]$ indexed by $\Fs\times\Fs$,
+and the Hermitian product $\langle f,g\rangle=\sum_{x\in\Fs}\conj{f(x)}g(x)$. We have
+$(\mN\mA+\mA\mN)_{xz}=\chi(x-\psi x)\chi(\psi x-z)+\chi(x-\psi z)\chi(\psi z-z)$. For $z=x$ this is $2\chi(-1)=-2$; for $z=\psi x$
+it is $0$; otherwise it equals $-(T_1+T_2)=0$ by~\eqref{eq:C}. Hence $\mN\mA+\mA\mN=-2I$.
+
+The substitution $z=xt$ gives $\mA\eta=J(\chi,\eta)\,\chi\eta$ for $\eta\ne1$, and $\mA^{\mathsf T}=-\mA$ because $\chi(-1)=-1$. By
+(B) and (H2), $\chi(x-\psi x)\chi(\psi x)=1$ and $\chi(x-\psi x)=-\chi(x)$, so $\langle\eta',\mN(\chi\eta)\rangle=M(\eta',\eta)$ and
+$\langle\chi\eta',\mN\eta\rangle=-M(\eta',\eta)$. Therefore
+\[
+\begin{aligned}
+\langle\eta',\mN\mA\eta\rangle&=J(\chi,\eta)\,M(\eta',\eta),\\
+\langle\eta',\mA\mN\eta\rangle&=-\langle\mA\eta',\mN\eta\rangle=-\conj{J(\chi,\eta')}\,\langle\chi\eta',\mN\eta\rangle
+=\conj{J(\chi,\eta')}\,M(\eta',\eta),
+\end{aligned}
+\]
+and the sum equals $\langle\eta',-2\eta\rangle=-2(q-1)\delta_{\eta\eta'}$.
+\end{proof}
+
+\section{Coincidences of Jacobi sums}\label{sec:stickel}
+
+In this section $q=p^k\equiv3\pmod 4$ and $q>3$, so that $h=(q-1)/2>1$ is odd and $k$ is odd. For $y\in\Z/h\Z$ put
+\[
+E(y)=\sum_{j=0}^{k-1}(-1)^{\res{p^jy}{h}},\qquad A(y)=\sum_{j=0}^{k-1}\res{p^jy}{h}.
+\]
+Both are invariant under $y\mapsto py$, since $p^k=2h+1\equiv1\pmod h$. As $p^j<h$ for $j<k$, we have $A(1)=\sum_{j<k}p^j=2h/(p-1)$.
+
+\begin{lemma}\label{lem:L}
+Let $\beta\in\Z/h\Z$ and $\epsilon\in\{\pm1\}$. If $E(u\beta)=\epsilon E(u)$ for all $u\in(\Z/h\Z)^*$, then $\beta=\epsilon p^j$ for some
+$0\le j<k$.
+\end{lemma}
+
+\begin{proof}
+\emph{Step 0: reduction to $\epsilon=1$.} The residues $\res{p^j}{h}=p^j$ are odd and $\res{-p^j}{h}=h-p^j$ is even, so $E(1)=-k$
+and $E(-1)=k$. If $\beta=0$, the hypothesis with $u=\pm1$ gives $k=-\epsilon k$ and $k=\epsilon k$, which is impossible; so
+$\beta\ne0$. For $z\not\equiv0$ we have $\res{-z}{h}=h-\res{z}{h}$, so $E(-y)=-E(y)$ for $y\ne0$. Replacing $\beta$ by $\epsilon\beta$
+we may assume $\epsilon=1$.
+
+\emph{Step 1: $A(v\beta)=A(v)$ for all units $v$.} For $z\in\Z/h\Z$ write $\res{z}{h}/h=\sum_{\ell\ge1}d_\ell(z)2^{-\ell}$ with
+$d_\ell(z)\in\{0,1\}$, the binary expansion not ending in an infinite string of ones. Since
+$\res{2w}{h}=2\res{w}{h}-h\,d_1(w)$ and $h$ is odd, $\res{2w}{h}\equiv d_1(w)\pmod 2$; as $d_1(2^{\ell-1}z)=d_\ell(z)$, we get
+$\res{2^\ell z}{h}\equiv d_\ell(z)\pmod2$ for $\ell\ge1$. Hence
+\[
+E(2^\ell y)=k-2c_\ell(y),\qquad c_\ell(y)=\#\{j<k:\ d_\ell(p^jy)=1\}.
+\]
+Applying the hypothesis to $u=2^\ell v$ ($\ell\ge1$, $v$ a unit; $2$ is a unit as $h$ is odd) gives $c_\ell(v\beta)=c_\ell(v)$ for
+all $\ell\ge1$, and therefore $A(v\beta)=h\sum_{\ell\ge1}c_\ell(v\beta)2^{-\ell}=A(v)$.
+
+\emph{Step 2: $\beta\in\{p^a\}\cup\{\frac{p^a+p^b}{2}:a\ne b\}$.} Let $y_j=\res{p^j\beta}{h}$ for $j\ge0$; then $y_k=y_0$ and
+$y_{j+1}=py_j-n_jh$ with integers $0\le n_j\le p-1$. Summing over $0\le j<k$ and using Step~1 with $v=1$ gives
+$\sum_jn_j=(p-1)A(\beta)/h=(p-1)A(1)/h=2$. Iterating, $y_0=y_k=p^ky_0-h\sum_{j<k}n_jp^{k-1-j}$, i.e.\ $2h\,y_0=hN$ with
+$N=\sum_jn_jp^{k-1-j}$. Since the $n_j$ are non-negative with sum $2$, $y_0=N/2$ is of the stated form.
+
+\emph{Step 3: the second case is impossible.} The set of $\beta$ satisfying the hypothesis (with $\epsilon=1$) is closed under
+multiplication by powers of $p$ (as $E(py)=E(y)$) and under products $\beta\beta'$ with $\beta'$ a unit (as
+$E(u\beta\beta')=E(u\beta')=E(u)$). Suppose $\res{\beta}{h}=(p^a+p^b)/2$ with $a\ne b$ (so $k\ge3$). Multiplying by $p^{-a}$ we may
+assume $\beta\equiv(1+p^c)/2$ with $0<c<k$. Since $\gcd(p^c+1,p^k-1)=2$ for odd $k$, $\beta$ is a unit, so $\beta^2$ also satisfies
+the hypothesis and $\res{\beta^2}{h}$ is of the form found in Step~2. Note $2c\ne k$.
+
+If $2c<k$, then $\res{\beta^2}{h}=(1+2p^c+p^{2c})/4<h$, and $1+2p^c+p^{2c}\in\{4p^a,\ 2p^a+2p^b\}$. This is impossible by uniqueness
+of base-$p$ expansions: the left-hand side has the three non-zero digits $1,2,1$, the right-hand side at most two.
+
+If $2c>k$, then $\beta^2\equiv R:=(p^k+2p^c+p^{2c-k})/4\pmod h$, because the difference $(1+2p^c+p^{2c})/4-R$ equals
+$h\,(p^{2c-k}-1)/2$. Moreover $h/2<R<h$, the upper bound because $2p^c+p^{2c-k}+2\le2p^{k-1}+p^{k-2}+2<p^k$. On the other hand,
+every element of the set in Step~2 is smaller than $h/2=(p^k-1)/4$, except $3^{k-1}$ when $p=3$. Finally $R\ne3^{k-1}$: otherwise
+$2\cdot3^c+3^{2c-k}=3^{k-1}$, which is impossible for $c=k-1$ by size and for $c\le k-2$ by uniqueness of base-$3$ expansions.
+Hence $\res{\beta}{h}=p^a$.
+\end{proof}
+
+Let $\eta_1=\omega^{-1}$, a generator of $\widehat{\Fs}$; since $\omega$ is injective, so is $\eta_1$.
+
+\begin{proposition}\label{prop:coinc}
+Let $\eta'\in\widehat{\Fs}\setminus\{1,\chi\}$. If $J(\chi,\eta_1)+\conj{J(\chi,\eta')}=0$, then $\eta'=\chi\eta_1^{p^j}$ for some
+$0\le j<k$.
+\end{proposition}
+
+\begin{proof}
+Write $\eta'=\omega^{-b}$ with $b\in\Z/(q-1)\Z$, $b\notin\{0,h\}$; note $\chi=\omega^{-h}$. As $\conj{J(\chi,\eta')}=J(\chi,\conj{\eta'})$
+and $\chi\eta_1,\chi\conj{\eta'}\ne1$, the hypothesis reads $G(\chi)G(\eta_1)/G(\chi\eta_1)=-G(\chi)G(\conj{\eta'})/G(\chi\conj{\eta'})$,
+i.e.\
+\[
+G(\omega^{-1})\,G(\omega^{-(h-b)})=-\,G(\omega^{-(1+h)})\,G(\omega^{b}).
+\]
+Applying $\sigma_t$ for $t\in(\Z/(q-1)\Z)^*$ and taking $\mathfrak P$-adic valuations (Theorem~\ref{thm:stickelberger}) gives
+\begin{equation}\label{eq:digits}
+s(t)+s\bigl(t(h-b)\bigr)=s\bigl(t(1+h)\bigr)+s(-tb)\qquad\text{for all }t\in(\Z/(q-1)\Z)^* .
+\end{equation}
+(All four arguments are non-zero modulo $q-1$.)
+
+\emph{Digit sums as sums of residues.} If $\res{x}{q-1}=\sum_{i<k}x_ip^i$, then $\res{p^jx}{q-1}=\sum_ix_ip^{(i+j)\bmod k}$, because
+$p^k\equiv1\pmod{q-1}$. Summing over $j$ gives $\sum_{j<k}\res{p^jx}{q-1}=s(x)\,(q-1)/(p-1)$. Consequently, for $x,y\in\Z/(q-1)\Z$,
+\[
+s(x)+s(y)-s(x+y)=(p-1)\cdot\#\bigl\{j<k:\ \res{p^jx}{q-1}+\res{p^jy}{q-1}\ge q-1\bigr\}.
+\]
+Since $p^j$ is odd, $\res{p^jh}{q-1}=h$, and with $y=h$ we get $s(x)+s(h)-s(x+h)=(p-1)\gamma(x)$, where
+$\gamma(x)=\#\{j<k:\res{p^jx}{q-1}\ge h\}$.
+
+\emph{Reduction to Lemma~\ref{lem:L}.} For odd $t$ we have $th\equiv h$, so $t(1+h)=t+h$ and $t(h-b)=h+(-tb)$. Substituting
+$s(t+h)=s(t)+s(h)-(p-1)\gamma(t)$ and $s(h+(-tb))=s(h)+s(-tb)-(p-1)\gamma(-tb)$ into~\eqref{eq:digits} gives
+$\gamma(t)=\gamma(-tb)$. The map $z\mapsto z+h$ on $\Z/(q-1)\Z$ exchanges $\{z:\res{z}{q-1}<h\}$ and $\{z:\res{z}{q-1}\ge h\}$, so
+$\gamma(x+h)=k-\gamma(x)$ for all $x$; and $z\mapsto-z$ does the same on residues different from $0,h$, so $\gamma(-x)=k-\gamma(x)$
+whenever $p^jx\notin\{0,h\}$ for all $j$, i.e.\ $x\notin\{0,h\}$. Since $tb\notin\{0,h\}$, the condition becomes
+$\gamma(t)+\gamma(tb)=k$. For odd $x$ and $z=\res{p^jx}{q-1}$ (odd), $z\ge h$ holds if and only if $\res{z}{h}=z-h$ is even; hence
+$\gamma(x)=\tfrac12\bigl(k+E(x\bmod h)\bigr)$ for odd $x$. Put $u=t\bmod h$ and $\beta=b\bmod h$. If $b$ is odd, $tb$ is odd and the
+condition reads $E(u\beta)=-E(u)$. If $b$ is even, $tb+h$ is odd and $\gamma(tb)=k-\gamma(tb+h)=\tfrac12(k-E(u\beta))$, so the condition
+reads $E(u\beta)=E(u)$. Every $u\in(\Z/h\Z)^*$ lifts to an odd unit $t$, hence
+\[
+E(u\beta)=(-1)^bE(u)\qquad\text{for all }u\in(\Z/h\Z)^* .
+\]
+
+\emph{Conclusion.} By Lemma~\ref{lem:L}, $\beta=(-1)^bp^j$ for some $j<k$. If $b$ is even, then $b\equiv p^j\pmod h$ and $b$ even
+force $b=p^j+h=p^j(1+h)$ in $\Z/(q-1)\Z$, i.e.\ $\eta'=\omega^{-p^j(1+h)}=\chi\eta_1^{p^j}$. If $b$ is odd, then $b=-p^j$ and
+$\eta'=\conj{\eta_1}^{\,p^j}$; but then $\conj{J(\chi,\eta')}=J(\chi,\eta_1^{p^j})=J(\chi,\eta_1)$ by Lemma~\ref{lem:frob}, and the
+hypothesis gives $2J(\chi,\eta_1)=0$, contradicting $|J(\chi,\eta_1)|=\sqrt q$.
+\end{proof}
+
+\section{The case \texorpdfstring{$q\equiv3\pmod4$}{q = 3 (mod 4)}}\label{sec:q3}
+
+Throughout this section $q=p^k\equiv3\pmod4$, $q\ge7$, and $\psi$ satisfies (H1)--(H3) and~\eqref{eq:A}.
+
+\begin{lemma}\label{lem:distinct}
+If $k\ge3$, the integers $p^j-p^{j'}$ with $0\le j\ne j'<k$ are non-zero and pairwise incongruent modulo $h$.
+\end{lemma}
+
+\begin{proof}
+They are non-zero modulo $h$ because $0<|p^j-p^{j'}|\le p^{k-1}-1<h$. They are pairwise distinct as integers: $p^j-p^{j'}=p^i-p^{i'}$
+means $p^j+p^{i'}=p^i+p^{j'}$, and uniqueness of base-$p$ expansions (digits at most $2<p$) forces $(j,j')=(i,i')$. If $p\ge5$, all
+of them have absolute value at most $p^{k-1}-1<h/2$, so distinct ones are incongruent. Let $p=3$ and suppose $D_1=3^a-3^b$ and
+$D_2=3^c-3^d$ are distinct and congruent modulo $h$. As $|D_1-D_2|\le2(3^{k-1}-1)<2h$, we get $D_1-D_2=\pm h$; after exchanging
+$D_1,D_2$ we may take the sign $+$, i.e.\ $2(3^a+3^d)+1=3^k+2(3^b+3^c)$. The right-hand side is at least $3^k+4$; if $\min(a,d)\le k-2$
+the left-hand side is at most $2\cdot3^{k-1}+2\cdot3^{k-2}+1<3^k$. So $a=d=k-1$, and then $3^{k-1}+1=2(3^b+3^c)$. Reducing modulo $3$
+(recall $k\ge3$) forces $b=c=0$, hence $3^{k-1}=3$, a contradiction.
+\end{proof}
+
+\begin{proposition}\label{prop:frob}
+There are $c\in\Ns$ and $0\le j_0<k$ such that $\psi(x)=c\,x^{p^{j_0}}$ for all $x\in\Sq$.
+\end{proposition}
+
+\begin{proof}
+By Lemma~\ref{lem:jacobi} and Proposition~\ref{prop:coinc}, $M(\eta',\eta_1)=0$ for every $\eta'\notin\{1,\chi,\eta_1\}$ which is not of
+the form $\chi\eta_1^{p^j}$. Moreover $M(1,\eta_1)=\sum_x\eta_1(\psi x)=0$ because $\psi$ permutes $\Fs$, and
+$M(\chi,\eta_1)=\sum_y\chi(\psi y)\eta_1(y)=-\sum_y\chi(y)\eta_1(y)=0$ by (H1), (H2). By Fourier inversion,
+\[
+\eta_1(\psi x)=\alpha\,\eta_1(x)+\sum_{j<k}\beta_j\,\chi(x)\eta_1(x)^{p^j}\qquad(x\in\Fs)
+\]
+for some $\alpha,\beta_j\in\C$, so on $\Sq$ we have $\eta_1(\psi x)=\sum_{j<k}\gamma_j\,\lambda_j(x)$, where $\lambda_j$ is the
+restriction of $\eta_1^{p^j}$ to the cyclic group $\Sq$ of order $h$, $\gamma_0=\alpha+\beta_0$ and $\gamma_j=\beta_j$ for $j\ge1$. A
+character $\eta_1^m$ is trivial on $\Sq$ if and only if $h\mid m$. By Lemma~\ref{lem:distinct} (vacuous for $k=1$) the characters
+$\lambda_j\conj{\lambda_{j'}}$, $j\ne j'$, of $\Sq$ are non-trivial and pairwise distinct. Since $|\eta_1(\psi x)|=1$,
+\[
+1=\Bigl|\sum_j\gamma_j\lambda_j(x)\Bigr|^2=\sum_j|\gamma_j|^2+\sum_{j\ne j'}\gamma_j\conj{\gamma_{j'}}\,\lambda_j\conj{\lambda_{j'}}(x)
+\qquad(x\in\Sq),
+\]
+and by linear independence of characters $\gamma_j\conj{\gamma_{j'}}=0$ for $j\ne j'$. So exactly one coefficient $\gamma_{j_0}$ is
+non-zero, and $\eta_1\bigl(\psi(x)x^{-p^{j_0}}\bigr)=\gamma_{j_0}$ for $x\in\Sq$. As $\eta_1$ is injective, $\psi(x)x^{-p^{j_0}}$ is
+constant on $\Sq$, equal to $c=\psi(1)$, which lies in $\Ns$ by (H2).
+\end{proof}
+
+\begin{proposition}\label{prop:lin}
+If $\psi(x)=cx$ for all $x\in\Sq$, then $q\in\{7,11\}$, and $c\in\{3,5\}$ for $q=7$, $c\in\{2,6\}$ for $q=11$.
+\end{proposition}
+
+\begin{proof}
+Since $\psi$ is an involution, $\psi(cx)=x$, so the pairs of $S$ other than $P_0$ are $\{x,cx\}$, $x\in\Sq$. For distinct
+$x,y\in\Sq$ and $t=x/y\in\Sq\setminus\{1\}$,
+\[
+(x-y)(x-cy)(cx-y)(cx-cy)=c\,(x-y)^2\,y^2\,(t-c)(ct-1),
+\]
+so by (H3) and $\chi(c)=-1$,
+\begin{equation}\label{eq:lincond}
+\chi\bigl((t-c)(ct-1)\bigr)=1\qquad\text{for all }t\in\Sq\setminus\{1\}.
+\end{equation}
+If $c=-1$, then $(t-c)(ct-1)=-(t+1)^2$ with $t+1\ne0$ (as $-1\in\Ns$), contradicting~\eqref{eq:lincond}; note
+$\Sq\setminus\{1\}\ne\emptyset$. So $c\ne\pm1$, and $f(r)=(r^2-c)(cr^2-1)$ has the four distinct roots $\pm\sqrt c,\pm1/\sqrt c$ in
+$\mathbb F_{q^2}$; in particular $f$ is not a constant times a square. Splitting $\sum_{r\in\F}\chi(f(r))$ according to $r=0$,
+$r^2=1$ and $r^2\in\Sq\setminus\{1\}$ and using~\eqref{eq:lincond},
+\[
+\sum_{r\in\F}\chi(f(r))=\chi(c)+2\chi\bigl(-(1-c)^2\bigr)+2(h-1)=-1-2+q-3=q-6 .
+\]
+By (W), $q-6\le3\sqrt q$, i.e.\ $q\le19$. The prime powers $q\equiv3\pmod 4$ with $7\le q\le19$ are $7,11,19$. Table~\ref{tab:witness}
+lists, for each non-square $c\ne-1$, either a square $t\ne1$ violating~\eqref{eq:lincond} or ``admissible''.
+\end{proof}
+
+\begin{table}[ht]
+\centering
+\caption{Non-squares $c\neq-1$ for $q=7,11,19$ and the condition~\eqref{eq:lincond}.}\label{tab:witness}
+\begin{tabular}{@{}lll@{}}
+\toprule
+$q$ & admissible $c$ & excluded $c$, with a square $t\ne1$ such that $\chi\bigl((t-c)(ct-1)\bigr)=-1$\\
+\midrule
+$7$  & $3,\ 5$ & ---\\
+$11$ & $2,\ 6$ & $(c,t)=(7,3),\ (8,3)$\\
+$19$ & --- & $(c,t)=(2,4),\ (3,6),\ (8,7),\ (10,4),\ (12,7),\ (13,6),\ (14,9),\ (15,9)$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{proposition}\label{prop:frob-impossible}
+The case $j_0\ne0$ in Proposition~\ref{prop:frob} does not occur.
+\end{proposition}
+
+\begin{proof}
+Suppose $\psi(x)=cx^\rho$ on $\Sq$ with $\rho=p^{j_0}$, $0<j_0<k$; in particular $k\ge3$. For $x\in\Sq$, (B) gives
+$-1=\chi\bigl(x(x-cx^\rho)\bigr)=\chi\bigl(1-cx^{\rho-1}\bigr)$; with $x=y^2$ we get $\chi(1-cy^m)=-1$ for all $y\in\Fs$, where
+$m=2(\rho-1)$. Let $e=\gcd(m,q-1)$ and choose $u$ with $e\equiv mu\pmod{q-1}$. Then $y^e=(y^u)^m$, so $\chi(1-cy^e)=-1$ for all
+$y\in\Fs$ and
+\[
+\sum_{y\in\F}\chi(1-cy^e)=1-(q-1)=2-q .
+\]
+The polynomial $1-cX^e=-c(X^e-c^{-1})$ is separable because $p\nmid e$, so (W) gives $q-2\le(e-1)\sqrt q$. On the other hand,
+$e$ divides $\gcd\bigl(2(p^{j_0}-1),2(p^k-1)\bigr)=2(p^g-1)$ with $g=\gcd(j_0,k)$. Since $g$ is a proper divisor of the odd number $k$,
+$k/g\ge3$; so $P=p^g$ satisfies $P\ge3$ and $P^3\le q$, and $e-1\le2P-3$. As $(P^3-4)-(2P-3)^2=(P-3)(P^2-P+9)+14>0$,
+\[
+(q-2)^2\le(e-1)^2q\le(2P-3)^2q<(P^3-4)\,q\le(q-4)\,q<(q-2)^2,
+\]
+a contradiction.
+\end{proof}
+
+\begin{theorem}\label{thm:q3}
+Let $q\equiv3\pmod 4$, $q\ge7$. If a complete exterior set $S$ of a conic in $\PGtwo$ is an arc, then $q\in\{7,11\}$, and in the
+normal form with $P_0\in S$ the involution $\psi$ is $\psi(x)=cx$ for $x\in\Sq$ (and $\psi(x)=x/c$ for $x\in\Ns$), with $c\in\{3,5\}$
+for $q=7$ and $c\in\{2,6\}$ for $q=11$.
+\end{theorem}
+
+\begin{proof}
+Move a point of $S$ to $P_0$. By Corollary~\ref{cor:A}, $\psi$ satisfies~\eqref{eq:A}. Combine
+Propositions~\ref{prop:frob}, \ref{prop:frob-impossible} and~\ref{prop:lin}.
+\end{proof}
+
+\section{Proof of Theorem A}\label{sec:proof}
+
+\emph{Part (a)} is Proposition~\ref{prop:untouchable}.
+
+\emph{Part (b).} By (a) we must decide when a complete exterior set $S$ can be an arc. If $q\equiv1\pmod4$, then $S$ is linear by
+Theorem~\ref{thm:BSW}; as $(q+1)/2\ge3$, it is not an arc. If $q=3$, $S$ consists of two points, and the two exterior points on any
+of the three passants form such a set. If $q\equiv3\pmod 4$ and $q\ge7$, Theorem~\ref{thm:q3} gives $q\in\{7,11\}$; existence for
+these $q$ is shown below.
+
+\emph{Part (c) and existence.} Let $q\in\{7,11\}$ and $c_0=3$, respectively $c_0=2$. The pairs
+\[
+q=7:\ \{0,\infty\},\{1,3\},\{2,6\},\{4,5\};\qquad
+q=11:\ \{0,\infty\},\{1,2\},\{3,6\},\{4,8\},\{5,10\},\{9,7\}
+\]
+are $P_0$ and the pairs $\{x,c_0x\}$, $x\in\Sq$. By the proof of Proposition~\ref{prop:lin} they form a complete exterior set (since
+$c_0$ satisfies~\eqref{eq:lincond}, Table~\ref{tab:witness}), and a direct computation of the $\binom43=4$, respectively
+$\binom63=20$, determinants of the corresponding forms (supplementary file \texttt{examples.py}) shows that it is an arc. The
+Möbius involution $x\mapsto1/x$ fixes $P_0$ and maps $\{x,cx\}$ to $\{x',x'/c\}$ with $x'=1/x\in\Sq$; so it conjugates the solution
+with constant $c$ to the one with constant $c^{-1}$, and $3^{-1}=5$ in $\mathbb F_7$, $2^{-1}=6$ in $\mathbb F_{11}$. Hence, by
+Theorem~\ref{thm:q3}, every arc-like complete exterior set is the image of the example above under an element of $\PGL$, the group of
+collineations fixing $\Con$ (for prime $q$ this is the full stabiliser of $\Con$). Computing the orbit of the example under $\PGL$
+(\texttt{examples.py}) gives orbits of length $14$ and $22$, i.e.\ stabilisers of orders $336/14=24$ and $1320/22=60$. Both
+stabilisers lie in $\PSL$, and their element orders are distributed as $1,9,8,6$ elements of orders $1,2,3,4$ (for $q=7$) and
+$1,15,20,24$ elements of orders $1,2,3,5$ (for $q=11$); by Dickson's classification of subgroups of $\PSL$~\cite[Hauptsatz~II.8.27]{Huppert} they are
+isomorphic to $S_4$ and $A_5$. Independently, an exhaustive search in $\PGtwo$ (\texttt{plane\_check.py}) finds exactly $14$, respectively $22$, complete
+exterior sets that are arcs, and for $q=7$ also confirms that these are the only $(q+1)/2$-sets $S$ of exterior points for which
+$\Con\cup S$ has no tangents. \qed
+
+\begin{remark}
+The stabiliser acts on the $(q+1)/2$ points of $S$ as $S_4$ on $4$ points ($q=7$) and as $A_5\cong\mathrm{PSL}(2,5)$ on $6$ points
+($q=11$). The resulting sets without tangents of sizes $12$ and $18$ realise $u_7$ and $u_{11}$~\cite{VdV,HegerNagy}.
+\end{remark}
+
+\section{Verification and concluding remarks}\label{sec:verification}
+
+\subsection{Numerical checks}
+All steps of the proof were checked numerically with short scripts (supplementary material; each runs in seconds):
+Proposition~\ref{prop:untouchable} by exhaustive search in $\PGtwo$, over all $(q+1)/2$-sets of exterior points for $q\le9$
+and over all complete exterior sets for $q=11,13$; Lemma~\ref{lem:segre} on random triples for
+$q\le47$, including $q=27$; Lemmas~\ref{lem:autocorr} and~\ref{lem:jacobi} on the examples for $q=7,11$; the combinatorial part of
+Proposition~\ref{prop:coinc} (equivalence of~\eqref{eq:digits} with $E(u\beta)=(-1)^bE(u)$, and the resulting set of $b$)
+exhaustively for $q=p\le107$ and for $q=27,243,343,1331,2187$; Lemma~\ref{lem:frob} over $\mathbb F_{27}$ and $\mathbb F_{343}$;
+Proposition~\ref{prop:frob-impossible} directly for $q=27,243,343$. Moreover, an exhaustive search (the C program \texttt{bsw\_search.c} in the
+supplementary material, whose pruning rule is itself verified in Lean) lists all complete exterior sets for
+$q=7,11,19,23,27,31$; none of them is an arc for $q=19,23,27,31$, in agreement with the computations of Blokhuis,
+Seress and Wilbrink reported in~\cite[\S3]{VdV}.
+
+\subsection{Formal verification}
+The main chain of the argument has been formalised in Lean~4~\cite{Lean4} with Mathlib~\cite{Mathlib} (Lean v4.35.0, Mathlib
+revision \texttt{56a0058}); see the supplementary material. The theorem \texttt{BSW.Main.main\_vdv} states that for every finite field
+$F$ of odd order $q\notin\{3,7,11\}$, no fixed-point-free involution of $\PGone$ with pairwise compatible $2$-cycles (that is, no
+complete exterior set, Lemma~\ref{lem:pairs}) is an arc, where compatibility and collinearity are expressed by the formulas of
+Lemma~\ref{lem:dict}. It is proved without \texttt{sorry} and without axioms beyond the standard ones (\texttt{propext},
+\texttt{Classical.choice}, \texttt{Quot.sound}), but under explicit hypotheses expressing the classical results that are not in
+Mathlib:
+\begin{itemize}
+\item for $q\equiv1\pmod4$: McConnel's theorem~\cite{McConnel} (which contains Carlitz's theorem~\cite{Carlitz}), from which
+Theorem~\ref{thm:BSW} is derived formally;
+\item for $q\equiv3\pmod4$: the conclusion of Proposition~\ref{prop:coinc}, stated for an arbitrary generator $\eta_1$ of
+$\widehat{\Fs}$ (which is equivalent to the version above by Galois conjugation) and, for $k=1$, in a slightly stronger form
+with any $\eta\notin\{1,\chi\}$ in place of $\eta_1$; and, for $k\ge3$, Weil's bound (W) for square-free polynomials.
+\end{itemize}
+The geometric dictionary (Lemma~\ref{lem:dict}(v)), Corollary~\ref{cor:A} (by a different route, via determinants and Ceva's
+theorem), Lemmas~\ref{lem:autocorr}, \ref{lem:jacobi}, \ref{lem:L}, \ref{lem:distinct} and
+Propositions~\ref{prop:frob}--\ref{prop:frob-impossible} are formalised; for prime $q$ the formal proof replaces the use of (W) in
+Proposition~\ref{prop:lin} by an elementary argument. The examples for $q=7,11$ are checked by the Lean kernel. Not formalised are
+Stickelberger's theorem itself and the derivation of Proposition~\ref{prop:coinc} from it, Proposition~\ref{prop:untouchable}, and
+part (c) of Theorem~A.
+
+\subsection{Remarks}
+Theorem~A settles the case of arcs in the Blokhuis--Seress--Wilbrink conjecture: for $q\equiv3\pmod4$, $q>11$, no complete
+exterior set is an arc, whereas the conjecture predicts that every complete exterior set is linear for $q>31$. The arc property
+enters our proof only through the identity~\eqref{eq:A}, obtained from the Segre-type Lemma~\ref{lem:segre}; for general complete
+exterior sets the sign $\varepsilon$ is not constant, and the conjecture remains open.
+
+\section*{Declarations}
+
+\subsection*{Data and code availability}
+The supplementary material --- Python scripts for all computations mentioned in the paper, the search program and its
+output, and the Lean~4 project with its build and audit scripts --- is available at \todo{repository URL and archived DOI, e.g.\ GitHub + Zenodo}.
+
+\subsection*{Competing interests}
+The author declares no competing interests.
+
+\subsection*{Acknowledgements}
+This work started from Problem~3 of the International Olympiad in Cryptography NSUCRYPTO. The author thanks its organisers.
+
+\bibliographystyle{amsplain}
+\bibliography{refs}
+
+\end{document}
