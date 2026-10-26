@@ -60,4 +60,5 @@ the paper under CC BY 4.0 (`LICENSE-text.md`).
 ## Contact
 
 I. A. Chobanov, cobanovimam752@gmail.com, ORCID [0009-0001-1401-6527](https://orcid.org/0009-0001-1401-6527).
-The author is a high-school student at AESC MSU (Kolmogorov School); the work was done independently.
+The author is a high-school student at AESC MSU (Kolmogorov's boarding school of Moscow State University); the work was
+done independently.
