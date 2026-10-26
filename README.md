@@ -1,9 +1,11 @@
 # A proof of Van de Voorde's conjecture on conics and sets without tangents
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23670082.svg)](https://doi.org/10.5281/zenodo.23670082)
+
 This repository contains the paper
 
 > I. A. Chobanov, *Conics and (q+1)/2 exterior points forming a set without tangents: a proof of a
-> conjecture of Van de Voorde* (2026), [arXiv link / DOI]
+> conjecture of Van de Voorde*, preprint (2026)
 
 together with every computation it relies on and a Lean 4 formalisation of the main argument.
 

@@ -7,7 +7,9 @@ authors:
     orcid: "https://orcid.org/0009-0001-1401-6527"
     email: "cobanovimam752@gmail.com"
     affiliation: "The Advanced Educational Scientific Center (faculty) – Kolmogorov's boarding school of Moscow State University"
-version: "1.0.0"
+version: "1.0.2"
+doi: "10.5281/zenodo.23670082"
+repository-code: "https://github.com/H1z3-br0/van-de-voorde-conjecture"
 license: MIT
 keywords:
   - finite geometry
